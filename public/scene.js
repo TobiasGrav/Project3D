@@ -24,7 +24,7 @@ const gltfLoader = new GLTFLoader();
 //Objects gets constructed below:
 
 //Lighting objects constructed:
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
+const ambientLight = new THREE.AmbientLight(0xffffff, 1); // soft white light
 scene.add( ambientLight );
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 scene.add(directionalLight);
@@ -37,11 +37,19 @@ plane.rotation.x = -Math.PI/2;
 scene.add(plane);
 
 
-//GLTF model of the AK47 constructed
+//GLTF model of the Building1 constructed
 let building1;
 gltfLoader.load('/Models/Building1/Building1.gltf', function(gltf) {
     building1 = gltf.scene;
     scene.add(building1);
+})
+
+//GLTF model of the Building1 constructed
+let building2;
+gltfLoader.load('/Models/Building2/Building2.gltf', function(gltf) {
+    building2 = gltf.scene;
+    building2.position.x = 5;
+    scene.add(building2);
 })
 
 //Other logic
@@ -58,6 +66,9 @@ function animate() {
 
     if(building1) {
         building1.rotation.y += 0.01;
+    }
+    if(building2) {
+        building2.rotation.y += 0.01;
     }
 
     requestAnimationFrame( animate );
