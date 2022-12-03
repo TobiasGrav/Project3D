@@ -14,6 +14,9 @@ scene.background = new THREE.Color('gray');
 //Constructs the camera and camera controls
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 const controls = new OrbitControls(camera, renderer.domElement);
+camera.position.x = 10;
+camera.position.y = 5;
+camera.lookAt(0,0,0);
 
 //Constructs the GLTF loader
 const gltfLoader = new GLTFLoader();
@@ -21,16 +24,24 @@ const gltfLoader = new GLTFLoader();
 //Objects gets constructed below:
 
 //Lighting objects constructed:
-const ambientLight = new THREE.AmbientLight(0xffffff); // soft white light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
 scene.add( ambientLight );
-const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 scene.add(directionalLight);
 
+//Plane object constructed
+const geometry = new THREE.PlaneGeometry(100,100);
+const material = new THREE.MeshBasicMaterial( {color: 0x008000} );
+const plane = new THREE.Mesh(geometry, material);
+plane.rotation.x = -Math.PI/2;
+scene.add(plane);
+
+
 //GLTF model of the AK47 constructed
-let object_AK47;
-gltfLoader.load('/Models/AK47/scene.gltf', function(gltf) {
-    object_AK47 = gltf;
-    scene.add(gltf.scene);
+let building1;
+gltfLoader.load('/Models/Building1/Building1.gltf', function(gltf) {
+    building1 = gltf.scene;
+    scene.add(building1);
 })
 
 //Other logic
@@ -43,12 +54,10 @@ window.addEventListener('resize', function() {
     camera.updateProjectionMatrix();
 });
 
-camera.position.x = 10;
-
 function animate() {
-	
-    if(object_AK47) {
-        object_AK47.scene.scale.set(1,1,1)
+
+    if(building1) {
+        building1.rotation.y += 0.01;
     }
 
     requestAnimationFrame( animate );
