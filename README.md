@@ -12,3 +12,7 @@ This is accompliched by using the command.
 npm start
 
 this command will run the main.js file.
+
+to terminate the process use the key bind.
+
+ctrl + c
