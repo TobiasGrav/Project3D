@@ -60,13 +60,13 @@ function createParkPlaneGeometry() {
 createParkPlaneGeometry();
 
 //Function which gets a list of numbers and rearanges them into a list that consists of multiple (x,y,z) values
-function getPoints(mesh) {
+function getPoints(geometry) {
     const points = [];
     for ( let i = 0; i < count; i ++ ) {
         const point = [];
-        point.push(PlaneGeometry.attributes.position.getX(i));
-        point.push(PlaneGeometry.attributes.position.getY(i));
-        point.push(PlaneGeometry.attributes.position.getZ(i));
+        point.push(geometry.attributes.position.getX(i));
+        point.push(geometry.attributes.position.getY(i));
+        point.push(geometry.attributes.position.getZ(i));
         points.push(point);
     }
     return points;
