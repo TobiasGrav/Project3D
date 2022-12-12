@@ -40,7 +40,7 @@ let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight;
 function createParkPlaneGeometry(length, height) {
     parkLength = length;
     parkHeight = height;
-    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 30, 20);
+    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 60, 40);
     const count = parkGeometry.attributes.position.count;
     const colors = [];
 
@@ -75,7 +75,7 @@ function getPoints(geometry) {
 }
 
 function tickHeat(vertexIndex) {
-    const heatTickValue = 0.0027778 //2 / (12*60); // this is the value which will tick the rgb value, why 2 / (12*60)? this is the amount of minutes in a day.
+    const heatTickValue = 0.01 //2 / (12*60); // this is the value which will tick the rgb value, why 2 / (12*60)? this is the amount of minutes in a day.
     const vertexColor = parkGeometry.attributes.color;
     const vertexCurrentColor = [vertexColor.getX(vertexIndex), vertexColor.getY(vertexIndex), vertexColor.getZ(vertexIndex)];
     
@@ -116,45 +116,14 @@ function tickHeat(vertexIndex) {
 //scene.add(sun);
 
 //GLTF model of the Building1 constructed
-let building2;
-gltfLoader.load('/Models/Hospital/Hospital.glb', function(gltf) {
-    building2 = gltf.scene;
-    building2.position.x = -10;
-    building2.position.z = -5;
-    scene.add(building2);
+let bench1;
+gltfLoader.load('/Models/Bench/Bench.glb', function(gltf) {
+    bench1 = gltf.scene;
+    bench1.rotation.y = Math.PI/2;
+    bench1.position.x = -5;
+    bench1.position.z = 10;
+    scene.add(bench1);
 })
-
-//GLTF model of building 1
-let hospital;
-gltfLoader.load('/Models/Hospital/Hospital.glb', function(gltf){
-    hospital = gltf.scene;
-    hospital.position.x = 10;
-    hospital.position.z = 2;
-    scene.add(hospital);
-})
-
-let Bank;
-gltfLoader.load('/Models/Bank/Bank.glb', function(gltf){
-    Bank = gltf.scene;
-    Bank.position.x = 7;
-    Bank.position.z = 7;
-    scene.add(Bank);
-})
-
-let LightRedFlat;
-gltfLoader.load('/Models/LightRedFlat/LightRedFlat.glb', function(gltf){
-    LightRedFlat = gltf.scene;
-    LightRedFlat.position.x = 1;
-    scene.add(LightRedFlat);
-})
-
-let OrangeHouse;
-gltfLoader.load('/Models/OrangeHouse/OrangeHouse.glb', function(gltf){
-    OrangeHouse = gltf.scene;
-    OrangeHouse.position.x = 4;
-    scene.add(OrangeHouse);
-})
-
 
 //Other logic
 
@@ -208,7 +177,8 @@ window.addEventListener('resize', function() {
     camera.updateProjectionMatrix();
 });
 
-var sunAngle = (Math.PI / 720);
+var sunAngleTick = Math.PI/180;
+var sunAngle = sunAngleTick;
 var sunAngleSin = Math.sin(sunAngle);
 var sunAngleCos = Math.cos(sunAngle);
 var sunTick = 0;
@@ -240,10 +210,10 @@ function animate() {
     requestAnimationFrame( animate );
 
 
-    if(sunTick < 718 && animateSun) {
+    if(sunTick < 177 && animateSun) {
         startAnimateSun();
         sunTick++;
-        sunAngle += Math.PI / 720;
+        sunAngle += sunAngleTick;
         sunAngleSin = Math.sin(sunAngle);
         sunAngleCos = Math.cos(sunAngle);
         console.log(sunAngle);
