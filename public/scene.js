@@ -28,9 +28,9 @@ const gltfLoader = new GLTFLoader();
 //Objects gets constructed below:
 
 //Lighting objects constructed:
-const ambientLight = new THREE.AmbientLight(0xffffff, 1); // soft white light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // soft white light
 scene.add( ambientLight );
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffDDCC, 1);
 scene.add(directionalLight);
 
 //Defined the objects belonging to the parkPlane mesh
@@ -40,7 +40,7 @@ let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight;
 function createParkPlaneGeometry(length, height) {
     parkLength = length;
     parkHeight = height;
-    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 3, 2);
+    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 30, 20);
     const count = parkGeometry.attributes.position.count;
     const colors = [];
 
@@ -51,7 +51,7 @@ function createParkPlaneGeometry(length, height) {
     }
 
     parkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    const parkMaterial = new THREE.MeshBasicMaterial( {wireframe: true, vertexColors: true} );
+    const parkMaterial = new THREE.MeshBasicMaterial( {wireframe: false, vertexColors: true} );
 
     parkPlane = new THREE.Mesh(parkGeometry, parkMaterial);
     parkPlane.rotation.x = -Math.PI/2;
@@ -82,48 +82,45 @@ function tickHeat(vertexIndex) {
     if(vertexCurrentColor[2] > 0) {
         vertexColor.setZ(vertexIndex, vertexCurrentColor[2] - heatTickValue);
         
-    } else {
+    } else if(vertexCurrentColor[1] > 0) {
         vertexColor.setY(vertexIndex, vertexCurrentColor[1] - heatTickValue);
-    }
+    };
+};
 
-    if(vertexColor.getZ(vertexIndex) < 0) {
-        vertexColor.setZ(vertexIndex, 0);
-    }
-    if(vertexColor.getY(vertexIndex) < 0) {
-        vertexColor.setY(vertexIndex, 0);
-    }
-}
+////Red box object constructed
+//const redBoxGeometry = new THREE.BoxGeometry(1,1);
+//const redMeshMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+//const redBox = new THREE.Mesh(redBoxGeometry, redMeshMaterial);
+//redBox.position.x = 25;
+//scene.add(redBox);
+//
+////Blue box object constructed
+//const blueBoxGeometry = new THREE.BoxGeometry(15,5,5);
+//const blueMeshMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
+//const blueBox = new THREE.Mesh(blueBoxGeometry, blueMeshMaterial);
+//blueBox.position.y = 25;
+//scene.add(blueBox);
+//
+////green box object constructed
+//const greenBoxGeometry = new THREE.BoxGeometry(1,1);
+//const greenMeshMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+//const greenBox = new THREE.Mesh(greenBoxGeometry, greenMeshMaterial);
+//greenBox.position.z = 25;
+//scene.add(greenBox);
 
-//Red box object constructed
-const redBoxGeometry = new THREE.BoxGeometry(1,1);
-const redMeshMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-const redBox = new THREE.Mesh(redBoxGeometry, redMeshMaterial);
-redBox.position.x = 25;
-scene.add(redBox);
+//Constructing a sun didnt work since it gets detected by the ray casted.
+//const sunGeometry = new THREE.SphereGeometry(2,10,10);
+//const sunMaterial = new THREE.MeshBasicMaterial( {color: 0xffEE00} );
+//const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+//sun.position.z = 25;
+//scene.add(sun);
 
-//Blue box object constructed
-const blueBoxGeometry = new THREE.BoxGeometry(1,1);
-const blueMeshMaterial = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
-const blueBox = new THREE.Mesh(blueBoxGeometry, blueMeshMaterial);
-blueBox.position.y = 25;
-scene.add(blueBox);
-
-//green box object constructed
-const greenBoxGeometry = new THREE.BoxGeometry(1,1);
-const greenMeshMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-const greenBox = new THREE.Mesh(greenBoxGeometry, greenMeshMaterial);
-greenBox.position.z = 25;
-scene.add(greenBox);
-
-
-
-    /*
 //GLTF model of the Building1 constructed
 let building2;
 gltfLoader.load('/Models/Hospital/Hospital.glb', function(gltf) {
     building2 = gltf.scene;
-    building2.position.x = 23.5;
-    building2.position.z = 20;
+    building2.position.x = -10;
+    building2.position.z = -5;
     scene.add(building2);
 })
 
@@ -132,52 +129,76 @@ let hospital;
 gltfLoader.load('/Models/Hospital/Hospital.glb', function(gltf){
     hospital = gltf.scene;
     hospital.position.x = 10;
-    hospital.position.z = 22;
+    hospital.position.z = 2;
     scene.add(hospital);
 })
 
 let Bank;
 gltfLoader.load('/Models/Bank/Bank.glb', function(gltf){
     Bank = gltf.scene;
-    Bank.position.x = 17;
+    Bank.position.x = 7;
+    Bank.position.z = 7;
     scene.add(Bank);
 })
 
 let LightRedFlat;
 gltfLoader.load('/Models/LightRedFlat/LightRedFlat.glb', function(gltf){
     LightRedFlat = gltf.scene;
-    LightRedFlat.position.x = 15;
+    LightRedFlat.position.x = 1;
     scene.add(LightRedFlat);
 })
 
 let OrangeHouse;
 gltfLoader.load('/Models/OrangeHouse/OrangeHouse.glb', function(gltf){
     OrangeHouse = gltf.scene;
-    OrangeHouse.position.x = 20;
+    OrangeHouse.position.x = 4;
     scene.add(OrangeHouse);
 })
 
-*/
 
 //Other logic
 
 // gets the points of all the vertices in the world position
+let worldVertexPoints;
 function getWorldVerticesPoints() {
+    worldVertexPoints = []
+    for(let i = 0; i < parkGeometry.attributes.position.count; i++) {
+        const vertexPosition = parkGeometry.attributes.position;
+        const LocalVertexIndexPoint = new THREE.Vector3(vertexPosition.getX(i), vertexPosition.getY(i), vertexPosition.getZ(i));
+        const worldVertexIndexPoint = LocalVertexIndexPoint.applyQuaternion(parkPlane.quaternion) //applies the quaternion from the world object to the vertex point, so that we get the correct rotation of the vecore
+        worldVertexPoints.push(worldVertexIndexPoint);
+    };
+};
+getWorldVerticesPoints();
 
-}
+//const rayCaster = new THREE.Raycaster();
 
 function checkForSun(vertexIndex) {
-    const vertexPosition = parkGeometry.attributes.position;
-    const LocalVertexIndexPoint = new THREE.Vector3(vertexPosition.getX(vertexIndex), vertexPosition.getY(vertexIndex), vertexPosition.getZ(vertexIndex));
-    const WorldVertexIndexPoint = LocalVertexIndexPoint.applyQuaternion(parkPlane.quaternion) //applies the quaternion from the world object to the vertex point, so that we get the correct rotation of the vecore
-    const rayVector = new THREE.Vector3(0, Math.sin(sunAngle), -Math.cos(sunAngle));
+    const vertexPoint = worldVertexPoints[vertexIndex];
+    const rayVector = new THREE.Vector3(0, sunAngleSin, sunAngleCos);
+    //const ArrowVertexPointX = worldVertexPoints[vertexIndex].x + 1;
+    //const ArrowVertexPointY = worldVertexPoints[vertexIndex].y + 0;
+    //const ArrowVertexPointZ = worldVertexPoints[vertexIndex].z;
+    //const ArrowVertexPoint = new THREE.Vector3(ArrowVertexPointX, ArrowVertexPointY, ArrowVertexPointZ);
 
-    const rayCaster = new THREE.Raycaster();
-    rayCaster.set(WorldVertexIndexPoint, rayVector, 0, 10);
-    parkGeometry.attributes.color.setY(vertexIndex, 0);
-    parkGeometry.attributes.color.setZ(vertexIndex, 0);
-    scene.add(new THREE.ArrowHelper(rayVector, WorldVertexIndexPoint, 10, 0xff0000));
-}
+    //console.log(ArrowVertexPoint);
+
+    //const rayCaster = new THREE.Raycaster();
+    rayCaster.set(vertexPoint, rayVector, 0, 500);
+    const intersects = rayCaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0) {
+        console.log(intersects);
+        tickHeat(vertexIndex);
+        //const arrowPointList = [];
+        //arrowPointList.push(vertexPoint.x + rayVector.x + 15);
+        //arrowPointList.push(vertexPoint.y + rayVector.y + 1);
+        //arrowPointList.push(vertexPoint.z + rayVector.z);
+        //const arrowPoint = new THREE.Vector3(arrowPointList[0], arrowPointList[1], arrowPointList[2]);
+        //scene.add(new THREE.ArrowHelper(rayVector, arrowPoint, 1, 0xff0000, 0, 0));
+    }
+    //scene.add(new THREE.ArrowHelper(rayVector, vertexPoint, 10, 0xff0000)); visualizes the rays casted
+};
 
 //When the window size changes the renderer gets re-adjusted to fit the window
 window.addEventListener('resize', function() {
@@ -187,33 +208,56 @@ window.addEventListener('resize', function() {
     camera.updateProjectionMatrix();
 });
 
-var sunAngle = 0;
+var sunAngle = (Math.PI / 720);
+var sunAngleSin = Math.sin(sunAngle);
+var sunAngleCos = Math.cos(sunAngle);
 var sunTick = 0;
 
 //tickHeat(Math.floor(Math.random() * parkGeometry.attributes.position.count));
 
-window.setTimeout(function(){
-    for(;sunTick < 720;) {
-    for(let i = 0; i < parkGeometry.attributes.position.count; i++) {
-        checkForSun(i);
+let animateSun;
+function startAnimateSun() {
+    if(animateSun) {
+        //checkForSun(5);
+        for(let i = 0; i < parkGeometry.attributes.position.count; i++) {
+            checkForSun(i);
+        };
     }
-    sunAngle += Math.PI/720;
-    sunTick++;
 };
-}, 1000);
+
+function updateBackgroundColor() {
+    const red = 182 * sunAngleSin / 255;
+    const green = 221 * sunAngleSin / 255;
+    const blue = 255 * sunAngleSin / 255;
+    ambientLight.intensity = sunAngleSin;
+    console.log(scene.background);
+    scene.background = new THREE.Color(red, green, blue);
+}
 
 function animate() {
-
     parkGeometry.attributes.color.needsUpdate = true;
-
-    /*if(building1) {
-        building1.rotation.y += 0.01;
-    }
-    if(building2) {
-        building2.rotation.y += 0.01;
-    }*/
-
+    
     requestAnimationFrame( animate );
+
+
+    if(sunTick < 718 && animateSun) {
+        startAnimateSun();
+        sunTick++;
+        sunAngle += Math.PI / 720;
+        sunAngleSin = Math.sin(sunAngle);
+        sunAngleCos = Math.cos(sunAngle);
+        console.log(sunAngle);
+        updateBackgroundColor();
+        directionalLight.position.y = sunAngleSin*25;
+        directionalLight.position.z = sunAngleCos*25;
+    } else {
+        sunTick = 0;
+        sunAngle = 0;
+        animateSun = false;
+    }
+
 	renderer.render( scene, camera );
 }
+
+animateSun = true;
 animate();
