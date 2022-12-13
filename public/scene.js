@@ -34,13 +34,15 @@ const directionalLight = new THREE.DirectionalLight(0xffDDCC, 1);
 scene.add(directionalLight);
 
 //Defined the objects belonging to the parkPlane mesh
-let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight;
+let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight, parkLengthVertices, parkHeightVertices;
 
 //Function responsible for initilizing the variables defined above
-function createParkPlaneGeometry(length, height) {
+function createParkPlaneGeometry(length, height, verLen, verHei) {
     parkLength = length;
     parkHeight = height;
-    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 15, 10);
+    parkLengthVertices = verLen + 1;
+    parkHeightVertices = verHei + 1;
+    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, verLen, verHei);
     const count = parkGeometry.attributes.position.count;
     const colors = [];
 
@@ -51,7 +53,7 @@ function createParkPlaneGeometry(length, height) {
     }
 
     parkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    const parkMaterial = new THREE.MeshBasicMaterial( {wireframe: false, vertexColors: true} );
+    const parkMaterial = new THREE.MeshBasicMaterial( {wireframe: true, vertexColors: true} );
 
     parkPlane = new THREE.Mesh(parkGeometry, parkMaterial);
     parkPlane.rotation.x = -Math.PI/2;
@@ -59,7 +61,7 @@ function createParkPlaneGeometry(length, height) {
 };
 
 //initializes the parkPlane
-createParkPlaneGeometry(30, 20);
+createParkPlaneGeometry(30, 20, 30, 20);
 
 //Function which gets a list of numbers and rearanges them into a list that consists of multiple (x,y,z) values
 function getPoints(geometry) {
@@ -75,7 +77,7 @@ function getPoints(geometry) {
 }
 
 function tickHeat(vertexIndex) {
-    const heatTickValue = 0.01 //2 / (12*60); // this is the value which will tick the rgb value, why 2 / (12*60)? this is the amount of minutes in a day.
+    const heatTickValue = 0.04 //2 / (12*60); // this is the value which will tick the rgb value, why 2 / (12*60)? this is the amount of minutes in a day.
     const vertexColor = parkGeometry.attributes.color;
     const vertexCurrentColor = [vertexColor.getX(vertexIndex), vertexColor.getY(vertexIndex), vertexColor.getZ(vertexIndex)];
     
@@ -109,11 +111,11 @@ function tickHeat(vertexIndex) {
 //scene.add(greenBox);
 
 //Constructing a sun didnt work since it gets detected by the ray casted.
-//const sunGeometry = new THREE.SphereGeometry(2,10,10);
-//const sunMaterial = new THREE.MeshBasicMaterial( {color: 0xffEE00} );
-//const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-//sun.position.z = 25;
-//scene.add(sun);
+const sunGeometry = new THREE.SphereGeometry(5,10,10);
+const sunMaterial = new THREE.MeshBasicMaterial( {color: 0xffEE00} );
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.position.z = 50;
+scene.add(sun);
 
 //GLTF model of the Building1 constructed
 gltfLoader.load('/Models/Fountain/Fountain.glb', function(gltf) {
@@ -172,6 +174,11 @@ gltfLoader.load('/Models/Rock/Rock.glb', function(gltf) {
 
 //Other logic
 
+function updateSunPosition() {
+    sun.position.y = sunAngleSin * 200;
+    sun.position.z = sunAngleCos * 200;
+}
+
 // gets the points of all the vertices in the world position
 let worldVertexPoints;
 function getWorldVerticesPoints() {
@@ -197,12 +204,11 @@ function checkForSun(vertexIndex) {
 
     //console.log(ArrowVertexPoint);
 
-    //const rayCaster = new THREE.Raycaster();
-    rayCaster.set(vertexPoint, rayVector, 0, 500);
+    const rayCaster = new THREE.Raycaster(vertexPoint, rayVector, 0, 50);
     const intersects = rayCaster.intersectObjects(scene.children);
 
     if (intersects.length > 0) {
-        console.log(intersects);
+        //console.log(intersects);
         tickHeat(vertexIndex);
         //const arrowPointList = [];
         //arrowPointList.push(vertexPoint.x + rayVector.x + 15);
@@ -222,7 +228,8 @@ window.addEventListener('resize', function() {
     camera.updateProjectionMatrix();
 });
 
-var sunAngleTick = Math.PI/180;
+var degrees = 90;
+var sunAngleTick = Math.PI/degrees;
 var sunAngle = sunAngleTick;
 var sunAngleSin = Math.sin(sunAngle);
 var sunAngleCos = Math.cos(sunAngle);
@@ -231,12 +238,21 @@ var sunTick = 0;
 //tickHeat(Math.floor(Math.random() * parkGeometry.attributes.position.count));
 
 let animateSun;
+var rowIndex = 0;
 function startAnimateSun() {
-    if(animateSun) {
-        //checkForSun(5);
-        for(let i = 0; i < parkGeometry.attributes.position.count; i++) {
+    if(animateSun && rowIndex<parkHeightVertices) {
+        for(let i = parkLengthVertices*rowIndex; i < parkLengthVertices*(rowIndex+1); i++) {
+            console.log(i);
             checkForSun(i);
         };
+        rowIndex++;
+    } else {
+        sunTick++;
+        sunAngle += sunAngleTick;
+        sunAngleSin = Math.sin(sunAngle);
+        sunAngleCos = Math.cos(sunAngle);
+        console.log(sunAngle);
+        rowIndex = 0;
     }
 };
 
@@ -254,14 +270,11 @@ function animate() {
     
     requestAnimationFrame( animate );
 
+    console.log('new frame');
 
-    if(sunTick < 177 && animateSun) {
+    if(sunTick < degrees-2 && animateSun) {
         startAnimateSun();
-        sunTick++;
-        sunAngle += sunAngleTick;
-        sunAngleSin = Math.sin(sunAngle);
-        sunAngleCos = Math.cos(sunAngle);
-        console.log(sunAngle);
+        updateSunPosition();
         updateBackgroundColor();
         directionalLight.position.y = sunAngleSin*25;
         directionalLight.position.z = sunAngleCos*25;
@@ -274,5 +287,6 @@ function animate() {
 	renderer.render( scene, camera );
 }
 
+console.log(parkGeometry.attributes.position.count);
 animateSun = true;
 animate();
