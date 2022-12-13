@@ -40,7 +40,7 @@ let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight;
 function createParkPlaneGeometry(length, height) {
     parkLength = length;
     parkHeight = height;
-    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 60, 40);
+    parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, 15, 10);
     const count = parkGeometry.attributes.position.count;
     const colors = [];
 
@@ -116,13 +116,58 @@ function tickHeat(vertexIndex) {
 //scene.add(sun);
 
 //GLTF model of the Building1 constructed
-let bench1;
+gltfLoader.load('/Models/Fountain/Fountain.glb', function(gltf) {
+    const fountain = gltf.scene;
+    fountain.scale.set(3, 3, 3);
+    console.log(fountain.scale);
+
+    scene.add(fountain);
+})
+
+gltfLoader.load('/Models/MiddleTree/MiddleTree.glb', function(gltf) {
+    const middleTree1 = gltf.scene;
+    middleTree1.scale.set(6, 6, 6);
+    const middleTree2 = middleTree1.clone();
+
+    middleTree1.position.x = 5.5;
+    middleTree1.position.z = -8;
+
+    middleTree2.position.x = -5.5;
+    middleTree2.position.z = -8;
+
+    scene.add(middleTree1);
+    scene.add(middleTree2);
+})
+
 gltfLoader.load('/Models/Bench/Bench.glb', function(gltf) {
-    bench1 = gltf.scene;
+    const bench1 = gltf.scene;
+    bench1.scale.set(0.9, 0.9, 0.9);
+    console.log(bench1.scale);
+    const bench2 = bench1.clone();
+    const bench3 = bench1.clone();
+    
     bench1.rotation.y = Math.PI/2;
-    bench1.position.x = -5;
-    bench1.position.z = 10;
+    bench1.position.x;
+    bench1.position.z = -8;
+    
+    bench2.rotation.y = Math.PI/2;
+    bench2.position.x = 10;
+    bench2.position.z = -8;
+
+    bench3.rotation.y = Math.PI/2;
+    bench3.position.x = -10;
+    bench3.position.z = -8;
+
     scene.add(bench1);
+    scene.add(bench2);
+    scene.add(bench3);
+})
+
+gltfLoader.load('/Models/Rock/Rock.glb', function(gltf) {
+    const rock = gltf.scene;
+    scene.add(rock);
+    rock.position.x = -9;
+    rock.position.z = 7;
 })
 
 //Other logic
