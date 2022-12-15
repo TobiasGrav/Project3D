@@ -3,6 +3,14 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "./OrbitControls.js";
 import { GUI } from '/dat.gui/build/dat.gui.module.js';
 
+var sun, degrees, sunAngleTick, sunAngle, sunAngleSin, sunAngleCos, sunTick;
+
+//Defined the variables belonging to the parkPlane mesh
+let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight, parkLengthVertices, parkHeightVertices;
+
+//Variable which holds a list of the points of the vertices in the world
+let worldVertexPoints;
+
 //When the window size changes the renderer gets re-adjusted to fit the window
 window.addEventListener('resize', function() {
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -51,10 +59,17 @@ scene.add( ambientLight );
 const directionalLight = new THREE.DirectionalLight(0xffDDCC, 1);
 scene.add(directionalLight);
 
-//Defined the variables belonging to the parkPlane mesh
-let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight, parkLengthVertices, parkHeightVertices;
+//Just a sun simulating the presence of the sun, doesnt actually have a function in the simulation.
+function createSun() {
+    const sunGeometry = new THREE.SphereGeometry(5,10,10);
+    const sunMaterial = new THREE.MeshBasicMaterial( {color: 0xffEE00} );
+    sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.z = 200;
+    scene.add(sun);
+};
 
-function createScene() {
+//Creates the scene around the park
+function createCityModels() {
     //Creates the green plane of the scene
     const cityPlaneGeometry = new THREE.PlaneGeometry(100, 100);
     const cityPlaneMaterial = new THREE.MeshBasicMaterial({color: 0x209920});
@@ -183,17 +198,6 @@ function createScene() {
         scene.add(lightRedFlat);
         });
 
-    //GLTF model of the Cat constructed in the scene
-    gltfLoader.load('/Models/Cat/Cat.glb', function(gltf) {
-        const cat = gltf.scene;
-        cat.scale.set(0.5, 0.5, 0.5);
-        cat.position.x = 7;
-        cat.position.z = 2;
-        cat.rotation.y = Math.PI/4;
-        
-        scene.add(cat);
-        });
-
     //GLTF model of the Trees constructed in the scene
     gltfLoader.load('/Models/LargeTree/LargeTree.glb', function(gltf) {
         const largeTree = gltf.scene;
@@ -219,6 +223,82 @@ function createScene() {
     
 };
 
+//Creates the pa
+function createParkModels() {
+    //GLTF model of the fountain constructed in the park
+    gltfLoader.load('/Models/Fountain/Fountain.glb', function(gltf) {
+        const fountain = gltf.scene;
+        fountain.scale.set(3, 3, 3);
+
+        scene.add(fountain);
+    });
+
+    //GLTF model of the Cat constructed in the scene
+    gltfLoader.load('/Models/Cat/Cat.glb', function(gltf) {
+        const cat = gltf.scene;
+        cat.scale.set(0.5, 0.5, 0.5);
+        cat.position.x = 7;
+        cat.position.z = 2;
+        cat.rotation.y = Math.PI/4;
+        
+        scene.add(cat);
+    });
+
+    //GLTF model of the trees constructed in the park
+    gltfLoader.load('/Models/MiddleTree/MiddleTree.glb', function(gltf) {
+        const middleTree1 = gltf.scene;
+        middleTree1.scale.set(6, 6, 6);
+        const middleTree2 = middleTree1.clone();
+
+        middleTree1.position.x = 5.5;
+        middleTree1.position.z = -8;
+
+        middleTree2.position.x = -5.5;
+        middleTree2.position.z = -8;
+
+        scene.add(middleTree1);
+        scene.add(middleTree2);
+    });
+
+    //GLTF model of the benches constructed in the park
+    gltfLoader.load('/Models/Bench/Bench.glb', function(gltf) {
+        const bench1 = gltf.scene;
+        bench1.scale.set(0.9, 0.9, 0.9);
+        const bench2 = bench1.clone();
+        const bench3 = bench1.clone();
+        
+        bench1.rotation.y = Math.PI/2;
+        bench1.position.x;
+        bench1.position.z = -8;
+        
+        bench2.rotation.y = Math.PI/2;
+        bench2.position.x = 10;
+        bench2.position.z = -8;
+
+        bench3.rotation.y = Math.PI/2;
+        bench3.position.x = -10;
+        bench3.position.z = -8;
+
+        scene.add(bench1);
+        scene.add(bench2);
+        scene.add(bench3);
+    });
+
+    //GLTF model of the rock constructed in the park
+    gltfLoader.load('/Models/Rock/Rock.glb', function(gltf) {
+        const rock = gltf.scene;
+        scene.add(rock);
+        rock.position.x = -9;
+        rock.position.z = 7;
+    });
+};
+
+function createScene() {
+    createSun();
+    createCityModels();
+    createParkModels();
+};
+
 //Returns a list of 1's to create a completely white pallet
 function whitePallet(num) {
     const colors = [];
@@ -229,7 +309,7 @@ function whitePallet(num) {
         colors.push(1);
     };
     return colors;
-}
+};
 
 //Function responsible for initilizing the variables defined above
 function createParkPlaneGeometry(length, height, verLen, verHei) {
@@ -249,78 +329,8 @@ function createParkPlaneGeometry(length, height, verLen, verHei) {
     scene.add(parkPlane);
 };
 
-//Just a sun simulating the presence of the sun, doesnt actually have a function in the simulation.
-function createSun() {
-    const sunGeometry = new THREE.SphereGeometry(5,10,10);
-    const sunMaterial = new THREE.MeshBasicMaterial( {color: 0xffEE00} );
-    sun = new THREE.Mesh(sunGeometry, sunMaterial);
-    sun.position.z = 200;
-    scene.add(sun);
-}
-
-
-//GLTF model of the fountain constructed in the park
-gltfLoader.load('/Models/Fountain/Fountain.glb', function(gltf) {
-    const fountain = gltf.scene;
-    fountain.scale.set(3, 3, 3);
-
-    scene.add(fountain);
-})
-
-//GLTF model of the trees constructed in the park
-gltfLoader.load('/Models/MiddleTree/MiddleTree.glb', function(gltf) {
-    const middleTree1 = gltf.scene;
-    middleTree1.scale.set(6, 6, 6);
-    const middleTree2 = middleTree1.clone();
-
-    middleTree1.position.x = 5.5;
-    middleTree1.position.z = -8;
-
-    middleTree2.position.x = -5.5;
-    middleTree2.position.z = -8;
-
-    scene.add(middleTree1);
-    scene.add(middleTree2);
-})
-
-//GLTF model of the benches constructed in the park
-gltfLoader.load('/Models/Bench/Bench.glb', function(gltf) {
-    const bench1 = gltf.scene;
-    bench1.scale.set(0.9, 0.9, 0.9);
-    console.log(bench1.scale);
-    const bench2 = bench1.clone();
-    const bench3 = bench1.clone();
-    
-    bench1.rotation.y = Math.PI/2;
-    bench1.position.x;
-    bench1.position.z = -8;
-    
-    bench2.rotation.y = Math.PI/2;
-    bench2.position.x = 10;
-    bench2.position.z = -8;
-
-    bench3.rotation.y = Math.PI/2;
-    bench3.position.x = -10;
-    bench3.position.z = -8;
-
-    scene.add(bench1);
-    scene.add(bench2);
-    scene.add(bench3);
-})
-
-//GLTF model of the rock constructed in the park
-gltfLoader.load('/Models/Rock/Rock.glb', function(gltf) {
-    const rock = gltf.scene;
-    scene.add(rock);
-    rock.position.x = -9;
-    rock.position.z = 7;
-})
-
-//define variables
-var sun, degrees, sunAngleTick, sunAngle, sunAngleSin, sunAngleCos, sunTick;
-
+//initializes the scene and variables
 function init() {
-    createSun();
     createScene();
     createParkPlaneGeometry(40, 28, 60, 42);
     getWorldVerticesPoints();
@@ -331,10 +341,17 @@ function init() {
     sunAngleSin = Math.sin(sunAngle);
     sunAngleCos = Math.cos(sunAngle);
     sunTick = 0;
-}
+};
 
-// gets the points of all the vertices in the world position
-let worldVertexPoints;
+///////////////simulation logic///////////////
+
+//Updates the position of the fake sun.
+function updateSunPosition() {
+    sun.position.y = sunAngleSin * 200;
+    sun.position.z = sunAngleCos * 200;
+};
+
+//Gives the variable worldVertexPoints a list of points
 function getWorldVerticesPoints() {
     worldVertexPoints = []
     for(let i = 0; i < parkGeometry.attributes.position.count; i++) {
@@ -359,14 +376,6 @@ function tickHeat(vertexIndex) {
     };
 };
 
-///////////////simulation logic///////////////
-
-//Updates the position of the fake sun.
-function updateSunPosition() {
-    sun.position.y = sunAngleSin * 200;
-    sun.position.z = sunAngleCos * 200;
-}
-
 //Creates a ray to check if it collides with any objects
 //It is calculated by using trigonometry from 0 to pi;
 function checkForSun(vertexIndex) {
@@ -385,15 +394,14 @@ function updateVariables() {
     sunAngle += sunAngleTick;
     sunAngleSin = Math.sin(sunAngle);
     sunAngleCos = Math.cos(sunAngle);
-    console.log(sunAngle);
     rowIndex = 0;
-}
+};
 
 function resetVariables() {
     sunTick = 0;
     sunAngle = 0;
     animateSun = false;
-}
+};
 
 
 
@@ -420,9 +428,8 @@ function updateBackgroundColor() {
     const green = 221 * sunAngleSin / 255;
     const blue = 255 * sunAngleSin / 255;
     ambientLight.intensity = sunAngleSin;
-    console.log(scene.background);
     scene.background = new THREE.Color(red, green, blue);
-}
+};
 
 function animate() {
     parkGeometry.attributes.color.needsUpdate = true;
@@ -436,7 +443,7 @@ function animate() {
     }
 
 	renderer.render( scene, camera );
-}
+};
 
 init();
 animate();

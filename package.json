@@ -4,12 +4,13 @@
   "description": "A 3D project",
   "main": "index.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node Server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "three": "^0.147.0"
