@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "./OrbitControls.js";
-import { VertexNormalsHelper } from './jsm/helpers/VertexNormalsHelper.js';
-import { PlaneGeometry } from "three";
+import { GUI } from '/dat.gui/build/dat.gui.module.js';
 
 //When the window size changes the renderer gets re-adjusted to fit the window
 window.addEventListener('resize', function() {
@@ -32,6 +31,17 @@ camera.position.x = -50;
 camera.position.y = 20;
 camera.lookAt(0,0,0);
 
+//Constructs the GUI with simple controls for the simulation
+function constructGUI() {
+    const gui = new GUI();
+    var animateSunButton = { add:function(){ 
+        animateSun = true; 
+        parkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(whitePallet(parkGeometry.attributes.position.count), 3));
+    }};
+    gui.add(animateSunButton,'add').name('Start simulation');
+    gui.add(parkPlane.material, 'wireframe');
+}
+
 //Constructs the GLTF model loader
 const gltfLoader = new GLTFLoader();
 
@@ -45,6 +55,7 @@ scene.add(directionalLight);
 let parkGeometry, parkMaterial, parkPlane, parkLength, parkHeight, parkLengthVertices, parkHeightVertices;
 
 function createScene() {
+    //Creates the green plane of the scene
     const cityPlaneGeometry = new THREE.PlaneGeometry(100, 100);
     const cityPlaneMaterial = new THREE.MeshBasicMaterial({color: 0x209920});
     const cityPlane = new THREE.Mesh(cityPlaneGeometry, cityPlaneMaterial);
@@ -208,6 +219,18 @@ function createScene() {
     
 };
 
+//Returns a list of 1's to create a completely white pallet
+function whitePallet(num) {
+    const colors = [];
+    //creates a list of 1's to apply the rgb value of each vertice to (1,1,1) (white)
+    for ( let i = 0; i < num; i ++ ) {
+        colors.push(1);
+        colors.push(1);
+        colors.push(1);
+    };
+    return colors;
+}
+
 //Function responsible for initilizing the variables defined above
 function createParkPlaneGeometry(length, height, verLen, verHei) {
     parkLength = length;
@@ -216,16 +239,8 @@ function createParkPlaneGeometry(length, height, verLen, verHei) {
     parkHeightVertices = verHei + 1;
     parkGeometry = new THREE.PlaneBufferGeometry(parkLength, parkHeight, verLen, verHei);
     const count = parkGeometry.attributes.position.count;
-    const colors = [];
 
-    //creates a list of 1's to apply the rgb value of each vertice to (1,1,1) (white)
-    for ( let i = 0; i < count; i ++ ) {
-        colors.push(1);
-        colors.push(1);
-        colors.push(1);
-    }
-
-    parkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); //lets us manipulate the color of each vertex.
+    parkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(whitePallet(count), 3)); //lets us manipulate the color of each vertex.
     const parkMaterial = new THREE.MeshBasicMaterial( {wireframe: false, vertexColors: true} );
 
     parkPlane = new THREE.Mesh(parkGeometry, parkMaterial);
@@ -307,8 +322,9 @@ var sun, degrees, sunAngleTick, sunAngle, sunAngleSin, sunAngleCos, sunTick;
 function init() {
     createSun();
     createScene();
-    createParkPlaneGeometry(30, 20, 30, 20);
+    createParkPlaneGeometry(40, 28, 60, 42);
     getWorldVerticesPoints();
+    constructGUI();
     degrees = 90;
     sunAngleTick = Math.PI/degrees;
     sunAngle = sunAngleTick;
@@ -423,5 +439,4 @@ function animate() {
 }
 
 init();
-animateSun = true;
 animate();
